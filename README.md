@@ -2,6 +2,11 @@
 
 This addon allows users to set a specific **5-digit room number**. Only users within the same room can view each other's messages.
 
+### 🛠️ Installation Guide
+1. Make sure you have the [Tampermonkey](https://www.tampermonkey.net/) extension installed in your browser.
+2. Open the Tampermonkey dashboard and create a new userscript.
+3. **Please copy the code from the `Main program`, paste it into Tampermonkey, and save it.**
+
 ### 🔐 Requirements & Authentication
 * **Discord Authentication**: To prevent abuse and spam, Discord login verification is required before using this addon.
 * **Terms of Service**: Please review and adhere to our [Terms of Service](https://geofs-chat-app.vercel.app/terms.html) before proceeding.
