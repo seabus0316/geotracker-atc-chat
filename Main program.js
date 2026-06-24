@@ -12,14 +12,14 @@
     let savedPos = JSON.parse(localStorage.getItem('geofs_chat_pos')) || { x: 20, y: 20 };
     let savedRoom = localStorage.getItem('geofs_chat_room_persistent') || "20013";
 
-    // 
+    // ── 快捷鍵設定（從 localStorage 讀取，預設 T）──
     let toggleKey = (localStorage.getItem('geofs_acars_hotkey') || 't').toLowerCase();
 
     function buildChatURL() {
         return `${CHAT_URL}?room=${encodeURIComponent(savedRoom)}&geofs_logged_in=false&geofs_callsign=`;
     }
 
-    // 
+    // ── 建立 UI 外殼 ──
     let container = document.createElement('div');
     container.style.cssText = [
         `position: fixed`,
@@ -61,9 +61,9 @@
     titleSpan.textContent = '> ACARS PANEL';
     titleSpan.style.cssText = 'flex-shrink: 0;';
 
-    // 
+    // ── 快捷鍵 badge（點擊進入綁定模式）──
     let keyBadge = document.createElement('span');
-    keyBadge.title = 'Click to change the shortcut key';
+    keyBadge.title = '點擊以更換快捷鍵';
     keyBadge.style.cssText = [
         `font-size: 9px`,
         `color: #070b14`,
@@ -143,7 +143,7 @@
     container.appendChild(iframe);
     document.body.appendChild(container);
 
-    //
+    // ── 建立底部欄按鈕（等 GeoFS UI 載入後插入）──
     const ACARS_ICON = 'https://cdn.phototourl.com/free/2026-06-23-8980ac3f-2fcb-4161-882b-af37cdba8503.png';
 
     function syncBtn() {
@@ -186,19 +186,19 @@
         if (injectBottomButton()) clearInterval(btnTimer);
     }, 500);
 
-    // 
+    // ── 快捷鍵切換面板（使用者自訂按鍵）──
     window.addEventListener('keydown', (e) => {
-        if (isBindingKey) return; 
+        if (isBindingKey) return; // 綁定模式中不觸發切換
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.key.toLowerCase() === toggleKey) togglePanel();
     });
 
-    // 
+    // ── 拖曳面板邏輯 ──
     let isDragging = false;
     let dragStart  = { x: 0, y: 0 };
 
     dragHandle.addEventListener('mousedown', (e) => {
-        if (e.target === keyBadge) return; //
+        if (e.target === keyBadge) return; // 點 badge 不觸發拖曳
         isDragging = true;
         dragStart.x = e.clientX + parseInt(container.style.right  || 0);
         dragStart.y = e.clientY + parseInt(container.style.bottom || 0);
