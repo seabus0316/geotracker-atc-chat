@@ -56,28 +56,21 @@ function showLogin() {
       <h2>&gt; ACARS LOGIN</h2>
       <button class="btn" id="discordBtn">使用 Discord 登入</button>
     </div>`);
+
+  // 聽 popup 傳回來的訊號
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'acars_login_done') init();
+  }, { once: true });
+
   document.getElementById('discordBtn').onclick = async () => {
-    // 產生 OAuth URL
     const { data } = await sb.auth.signInWithOAuth({
       provider: 'discord',
       options: {
         redirectTo: location.href.split('?')[0] + location.search,
-        skipBrowserRedirect: true   // 不要直接跳轉，讓我們自己開視窗
+        skipBrowserRedirect: true
       }
     });
-
-    // 在新分頁打開登入
-    const popup = window.open(data.url, '_blank', 'width=500,height=700');
-
-    // 輪詢：等新分頁登入完成後，Supabase session 會寫進 localStorage
-    const timer = setInterval(async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        clearInterval(timer);
-        try { popup?.close(); } catch(e) {}
-        init(); // 重新走啟動流程
-      }
-    }, 1000);
+    window.open(data.url, '_blank', 'width=500,height=700');
   };
 }
 
@@ -184,16 +177,19 @@ async function enterChat() {
 // ---------- 啟動流程 ----------//
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
+
+  // 如果自己是 popup，通知 opener 然後關掉
+  if (window.opener && session) {
+    window.opener.postMessage({ type: 'acars_login_done' }, '*');
+    window.close();
+    return;
+  }
+
   if (!session) { showLogin(); return; }
 
-  const userId = session.user.id;
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
-  if (!profile) { showRoleSelect(userId); return; }
-
-  me = { id: userId, role: profile.role, name: profile.name, callsign: profile.callsign };
-  enterChat();
+  // 每次都讓用戶選角色
+  showRoleSelect(session.user.id);
 }
-
 sb.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_IN') init();
 });
