@@ -144,7 +144,7 @@ async function enterChat() {
     .limit(100);
   (history || []).forEach(renderMessage);
 
-  // 即時訂閱
+  // 即時訂閱 //
   channel = sb.channel('room:' + room)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room=eq.${room}` },
       payload => renderMessage(payload.new))
