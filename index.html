@@ -49,7 +49,7 @@ let channel = null;
 
 function render(html) { app.innerHTML = html; }
 
-// ---------- 1. 登入畫面 ----------//
+// ---------- 1. 登入畫面 ----------
 function showLogin() {
   render(`
     <div class="screen">
@@ -64,7 +64,7 @@ function showLogin() {
   };
 }
 
-// ---------- 2. 身分選擇 ----------//
+// ---------- 2. 身分選擇 ----------
 function showRoleSelect(userId) {
   render(`
     <div class="screen">
@@ -79,7 +79,7 @@ function showRoleSelect(userId) {
   });
 }
 
-// ---------- 3. 名字 / callsign 輸入 ----------//
+// ---------- 3. 名字 / callsign 輸入 ----------
 function showProfileForm(userId, role) {
   const placeholder = role === 'atc' ? '例如 RCTP_GND' : '例如 CAL123';
   render(`
@@ -136,7 +136,7 @@ async function enterChat() {
   }
 
   // 載入歷史訊息
-  const { data: history } = await supabase
+  const { data: history } = await sb
     .from('messages')
     .select('*')
     .eq('room', room)
