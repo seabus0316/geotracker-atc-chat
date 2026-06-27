@@ -164,7 +164,7 @@ async function enterChat() {
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 }
 
-// ---------- 啟動流程 ----------
+// ---------- 啟動流程 ----------//
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { showLogin(); return; }
