@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>GeoFS ACARS Chat</title>
+<title>Geotracker atc-Chat</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; }
@@ -33,9 +33,9 @@
 </style>
 </head>
 <body>
-<div id="app"><div class="screen"><h2>載入中...</h2></div></div>
+<div id="app"><div class="screen"><h2>Loading...</h2></div></div>
 <div id="loginOverlay" style="position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);">
-  <button onclick="startLogin()" style="background:#5865F2;color:#fff;border:none;padding:12px 24px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:13px;">使用 Discord 登入 ACARS</button>
+  <button onclick="startLogin()" style="background:#5865F2;color:#fff;border:none;padding:12px 24px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:13px;">Login with Discord</button>
 </div>
 <script>
 const SUPABASE_URL = "https://azkqdmcfmribiwcyfajh.supabase.co";
@@ -70,8 +70,8 @@ function startLogin() {
 function showLogin() {
   render(`
     <div class="screen">
-      <h2>&gt; ACARS LOGIN</h2>
-      <button class="btn" id="discordBtn">使用 Discord 登入</button>
+      <h2>&gt; Geotracker atc-chat LOGIN</h2>
+      <button class="btn" id="discordBtn">Login by Discord</button>
     </div>`);
 
   // 聽 popup 傳回來的訊號
@@ -114,20 +114,20 @@ function showRoleSelect(userId) {
 
 // ---------- 3. 名字 / callsign 輸入 ----------
 function showProfileForm(userId, role) {
-  const placeholder = role === 'atc' ? '例如 RCTP_GND' : '例如 CAL123';
+  const placeholder = role === 'atc' ? 'e.g., RCTP_GND' : 'e.g., CAL123';
   render(`
     <div class="screen">
       <h2>&gt; ${role.toUpperCase()} INFO</h2>
       <input id="nameInput" placeholder="Name" maxlength="24">
       <input id="callsignInput" placeholder="Callsign (${placeholder})" maxlength="24">
-      <button class="btn">確認</button>
+      <button class="btn">Confirm</button>
     </div>`);
   app.querySelector('.btn').onclick = async () => {
     const name = document.getElementById('nameInput').value.trim();
     const callsign = document.getElementById('callsignInput').value.trim();
-    if (!name || !callsign) return alert('請填寫完整');
+    if (!name || !callsign) return alert('Please fill in all fields.');
     const { error } = await sb.from('profiles').upsert({ id: userId, role, name, callsign });
-    if (error) return alert('儲存失敗: ' + error.message);
+    if (error) return alert('Failed to save: ' + error.message);
     me = { id: userId, role, name, callsign };
     enterChat();
   };
@@ -138,12 +138,12 @@ async function enterChat() {
   render(`
     <div id="chatHeader">
       <span>ROOM ${room} — ${me.name} [${me.callsign}] (${me.role.toUpperCase()})</span>
-      <span style="cursor:pointer;color:#f5c842" id="logoutBtn">登出</span>
+      <span style="cursor:pointer;color:#f5c842" id="logoutBtn">Logout</span>
     </div>
     <div id="messages"></div>
     <div id="inputRow">
-      <input id="msgInput" placeholder="輸入訊息..." maxlength="240">
-      <button id="sendBtn">送出</button>
+      <input id="msgInput" placeholder="Enter message..." maxlength="240">
+      <button id="sendBtn">Send</button>
     </div>`);
 
   document.getElementById('logoutBtn').onclick = async () => {
