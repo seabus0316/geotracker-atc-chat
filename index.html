@@ -38,7 +38,7 @@
 <script>
 const SUPABASE_URL = "https://azkqdmcfmribiwcyfajh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6a3FkbWNmbXJpYml3Y3lmYWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTEyNTEsImV4cCI6MjA5ODEyNzI1MX0.9R5DUC6Y3BH53M_BRDfW_ZvZHpmoR3DhbApTufzuTG4";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || '20013';
@@ -57,7 +57,7 @@ function showLogin() {
       <button class="btn" id="discordBtn">使用 Discord 登入</button>
     </div>`);
   document.getElementById('discordBtn').onclick = () => {
-    supabase.auth.signInWithOAuth({
+    sb.auth.signInWithOAuth({
       provider: 'discord',
       options: { redirectTo: location.href.split('?')[0] + location.search }
     });
@@ -93,7 +93,7 @@ function showProfileForm(userId, role) {
     const name = document.getElementById('nameInput').value.trim();
     const callsign = document.getElementById('callsignInput').value.trim();
     if (!name || !callsign) return alert('請填寫完整');
-    const { error } = await supabase.from('profiles').upsert({ id: userId, role, name, callsign });
+    const { error } = await sb.from('profiles').upsert({ id: userId, role, name, callsign });
     if (error) return alert('儲存失敗: ' + error.message);
     me = { id: userId, role, name, callsign };
     enterChat();
@@ -114,7 +114,7 @@ async function enterChat() {
     </div>`);
 
   document.getElementById('logoutBtn').onclick = async () => {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     location.reload();
   };
 
@@ -145,7 +145,7 @@ async function enterChat() {
   (history || []).forEach(renderMessage);
 
   // 即時訂閱
-  channel = supabase.channel('room:' + room)
+  channel = sb.channel('room:' + room)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room=eq.${room}` },
       payload => renderMessage(payload.new))
     .subscribe();
@@ -156,7 +156,7 @@ async function enterChat() {
     const content = input.value.trim();
     if (!content) return;
     input.value = '';
-    await supabase.from('messages').insert({
+    await sb.from('messages').insert({
       room, sender_id: me.id, role: me.role, name: me.name, callsign: me.callsign, content
     });
   }
@@ -166,18 +166,18 @@ async function enterChat() {
 
 // ---------- 啟動流程 ----------
 async function init() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sb.auth.getSession();
   if (!session) { showLogin(); return; }
 
   const userId = session.user.id;
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (!profile) { showRoleSelect(userId); return; }
 
   me = { id: userId, role: profile.role, name: profile.name, callsign: profile.callsign };
   enterChat();
 }
 
-supabase.auth.onAuthStateChange((event) => {
+sb.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_IN') init();
 });
 
