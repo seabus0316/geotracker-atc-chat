@@ -59,6 +59,10 @@ function showLogin() {
 
   // 聽 popup 傳回來的訊號
   window.addEventListener('message', (e) => {
+    window.addEventListener('message', (e) => {
+  console.log('message received:', e.data);
+  if (e.data?.type === 'acars_login_done') init();
+}, { once: true });
     if (e.data?.type === 'acars_login_done') init();
   }, { once: true });
 
@@ -178,16 +182,14 @@ async function enterChat() {
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
 
-  // 如果自己是 popup，通知 opener 然後關掉
-  if (window.opener && session) {
+  if (session && window.opener) {
     window.opener.postMessage({ type: 'acars_login_done' }, '*');
     window.close();
     return;
   }
 
+  // 沒有 opener 但有 session → 可能是 OAuth redirect 後的頁面，直接繼續
   if (!session) { showLogin(); return; }
-
-  // 每次都讓用戶選角色
   showRoleSelect(session.user.id);
 }
 sb.auth.onAuthStateChange((event) => {
