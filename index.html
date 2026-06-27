@@ -58,13 +58,16 @@ function showLogin() {
     </div>`);
 
   // 聽 popup 傳回來的訊號
-  window.addEventListener('message', (e) => {
-    window.addEventListener('message', (e) => {
-  console.log('message received:', e.data);
-  if (e.data?.type === 'acars_login_done') init();
+window.addEventListener('message', async (e) => {
+  if (e.data?.type === 'acars_login_done' && e.data.session) {
+    // 把 session 塞進 Supabase
+    await sb.auth.setSession({
+      access_token: e.data.session.access_token,
+      refresh_token: e.data.session.refresh_token
+    });
+    init();
+  }
 }, { once: true });
-    if (e.data?.type === 'acars_login_done') init();
-  }, { once: true });
 
   document.getElementById('discordBtn').onclick = async () => {
     const { data } = await sb.auth.signInWithOAuth({
@@ -182,11 +185,14 @@ async function enterChat() {
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
 
-  if (session && window.opener) {
-    window.opener.postMessage({ type: 'acars_login_done' }, '*');
+if (session && window.opener) {
+    window.opener.postMessage({ 
+      type: 'acars_login_done',
+      session: session  // 把整個 session 傳過去
+    }, '*');
     window.close();
     return;
-  }
+}
 
   // 沒有 opener 但有 session → 可能是 OAuth redirect 後的頁面，直接繼續
   if (!session) { showLogin(); return; }
