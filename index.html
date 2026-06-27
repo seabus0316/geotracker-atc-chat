@@ -53,8 +53,8 @@ function render(html) { app.innerHTML = html; }
 function showLogin() {
   render(`
     <div class="screen">
-      <h2>&gt; ACARS LOGIN</h2>
-      <button class="btn" id="discordBtn">使用 Discord 登入</button>
+      <h2>&gt; Geo-tracker ATC chat LOGIN</h2>
+      <button class="btn" id="discordBtn">Login by Discord</button>
     </div>`);
   document.getElementById('discordBtn').onclick = () => {
     sb.auth.signInWithOAuth({
