@@ -53,14 +53,31 @@ function render(html) { app.innerHTML = html; }
 function showLogin() {
   render(`
     <div class="screen">
-      <h2>&gt; Geo-tracker ATC chat LOGIN</h2>
-      <button class="btn" id="discordBtn">Login by Discord</button>
+      <h2>&gt; ACARS LOGIN</h2>
+      <button class="btn" id="discordBtn">使用 Discord 登入</button>
     </div>`);
-  document.getElementById('discordBtn').onclick = () => {
-    sb.auth.signInWithOAuth({
+  document.getElementById('discordBtn').onclick = async () => {
+    // 產生 OAuth URL
+    const { data } = await sb.auth.signInWithOAuth({
       provider: 'discord',
-      options: { redirectTo: location.href.split('?')[0] + location.search }
+      options: {
+        redirectTo: location.href.split('?')[0] + location.search,
+        skipBrowserRedirect: true   // 不要直接跳轉，讓我們自己開視窗
+      }
     });
+
+    // 在新分頁打開登入
+    const popup = window.open(data.url, '_blank', 'width=500,height=700');
+
+    // 輪詢：等新分頁登入完成後，Supabase session 會寫進 localStorage
+    const timer = setInterval(async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        clearInterval(timer);
+        try { popup?.close(); } catch(e) {}
+        init(); // 重新走啟動流程
+      }
+    }, 1000);
   };
 }
 
