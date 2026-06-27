@@ -7,7 +7,7 @@
 // ==/UserScript==
 (function () {
     'use strict';
-    const CHAT_URL = "https://geofs-chat-app.vercel.app/";
+    const CHAT_URL = "https://geotracker-atc-chat-6zem6qw3i-yongyuchao-5444s-projects.vercel.app";
     let isOpen   = false;
     let savedPos = JSON.parse(localStorage.getItem('geofs_chat_pos')) || { x: 20, y: 20 };
     let savedRoom = localStorage.getItem('geofs_chat_room_persistent') || "20013";
