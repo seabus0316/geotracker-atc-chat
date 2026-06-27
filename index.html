@@ -34,7 +34,9 @@
 </head>
 <body>
 <div id="app"><div class="screen"><h2>載入中...</h2></div></div>
-
+<div id="loginOverlay" style="position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);">
+  <button onclick="startLogin()" style="background:#5865F2;color:#fff;border:none;padding:12px 24px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:13px;">使用 Discord 登入 ACARS</button>
+</div>
 <script>
 const SUPABASE_URL = "https://azkqdmcfmribiwcyfajh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6a3FkbWNmbXJpYml3Y3lmYWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTEyNTEsImV4cCI6MjA5ODEyNzI1MX0.9R5DUC6Y3BH53M_BRDfW_ZvZHpmoR3DhbApTufzuTG4";
@@ -48,7 +50,22 @@ let me = null; // { id, role, name, callsign }
 let channel = null;
 
 function render(html) { app.innerHTML = html; }
-
+function startLogin() {
+  const popup = window.open(
+    'https://geotracker-atc-chat.vercel.app/?mode=login',
+    '_blank', 'width=500,height=700'
+  );
+  window.addEventListener('message', async (e) => {
+    if (e.data?.type === 'acars_login_done') {
+      document.getElementById('loginOverlay').style.display = 'none';
+      // 把 session 傳進 iframe
+      document.getElementById('embedFrame').contentWindow.postMessage({
+        type: 'acars_session',
+        session: e.data.session
+      }, 'https://geotracker-atc-chat.vercel.app');
+    }
+  }, { once: true });
+}
 // ---------- 1. 登入畫面 ----------
 function showLogin() {
   render(`
